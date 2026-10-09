@@ -1,14 +1,103 @@
-# Submission 1: Cross Site Scripting (XSS) Detection
-Nama: Harry Mardika
+# XSS Detection: Pipeline MLOps dengan TFX
 
-Username dicoding: hkacode
+Pipeline machine learning end-to-end untuk mendeteksi serangan **Cross-Site Scripting (XSS)** dari potongan teks atau HTML, dibangun dengan **TensorFlow Extended (TFX)**: validasi data, hyperparameter tuning, pelatihan CNN, evaluasi dengan TFMA, dan serving dengan **TensorFlow Serving** di Docker.
+
+Proyek ini adalah submission kelas MLOps Dicoding (*Submission 1: Cross Site Scripting (XSS) Detection*). **Nama:** Harry Mardika · **Username Dicoding:** hkacode
+
+## Ringkasan Hasil
+
+| Metrik | Nilai |
+|---|---|
+| Accuracy / loss (train) | 0.9988 / 0.0027 |
+| Validation accuracy / loss | 0.9897 / 0.0527 |
+| Hyperparameter terbaik | vocab 10.000, panjang sekuens 100, embedding 112, Conv1D 96 filter, Dense 192, learning rate ≈ 0.0012 |
+| Tuning | Keras Tuner RandomSearch, 30 trial, objective `val_accuracy` (terbaik 0.9917) |
+
+Model terbaik disimpan di epoch 3 dan pelatihan berhenti di epoch 6 (early stopping). Data cukup seimbang (54% XSS), sehingga akurasi 98,97% jauh di atas tebakan kelas mayoritas.
+
+Contoh prediksi dari model yang di-serve:
+
+| Input | Skor | Hasil |
+|---|---|---|
+| `</span> <span class="reference-text">` | 0.0053 | Bukan XSS |
+| `<sup onkeypress="alert(1)" contenteditable>test</sup>` | 0.99999 | XSS |
+
+## Deskripsi Proyek
 
 | | Deskripsi |
-| ----------- | ----------- |
-| **Dataset** | [Cross site scripting XSS dataset for Deep Learning](https://www.kaggle.com/datasets/syedsaqlainhussain/cross-site-scripting-xss-dataset-for-deep-learning) |
-| **Masalah** | Cross-site scripting (XSS) adalah jenis serangan siber yang memungkinkan penyerang menyisipkan skrip berbahaya ke dalam halaman web yang dilihat oleh pengguna lain. Serangan XSS dapat menyebabkan pencurian informasi, pengambilalihan akun, dan kerentanan keamanan lainnya. Masalah ini penting untuk diatasi karena dapat membahayakan data dan privasi pengguna. Dalam proyek ini, kita akan mendeteksi serangan XSS secara otomatis menggunakan model pembelajaran mendalam (Deep Learning). |
-| **Solusi Machine Learning** | Solusi yang diusulkan adalah mengembangkan model Deep Learning untuk mengklasifikasikan input teks sebagai aman atau berbahaya. Model akan dilatih menggunakan dataset XSS untuk mengenali pola-pola yang umum digunakan dalam serangan XSS. Dengan menggunakan Deep Learning, model diharapkan dapat mendeteksi serangan XSS secara efektif dan efisien. |
-| **Metode Pengolahan** | Metode pengolahan data yang digunakan dalam proyek ini meliputi: <br> 1. **Lowercasing**: Mengubah semua teks menjadi huruf kecil untuk memastikan konsistensi dalam analisis. <br> 2. **Cleaning**: Menghapus tanda petik satu (') dan petik dua (") dari input untuk mengurangi kompleksitas karakter spesial yang bisa menyebabkan kesalahan parsing. <br> 3. **Tokenization**: Memecah teks menjadi token-token yang lebih kecil yang dapat dianalisis secara individual. <br> 4. **Vectorization**: Mengubah token-token ini menjadi representasi numerik yang dapat digunakan sebagai input untuk model pembelajaran mendalam. |
-| **Arsitektur Model** | Arsitektur model yang digunakan terdiri dari beberapa lapisan, yaitu: <br> 1. **Input Layer**: Menerima input teks dalam bentuk string. <br> 2. **Text Vectorization Layer**: Mengubah teks menjadi token numerik dengan TextVectorization layer dari Keras. <br> 3. **Embedding Layer**: Mengubah token numerik menjadi vektor dimensi yang lebih tinggi untuk menangkap makna kontekstual dari token. <br> 4. **Convolutional Layer**: Menggunakan lapisan Conv1D untuk menangkap fitur spasial dari teks, membantu dalam mendeteksi pola-pola umum dalam serangan XSS. <br> 5. **Global Max Pooling Layer**: Mengambil nilai maksimum dari fitur yang dideteksi untuk setiap filter, mengurangi dimensi data dan fokus pada fitur yang paling menonjol. <br> 6. **Dense Layer**: Menggunakan lapisan fully connected untuk menggabungkan fitur-fitur yang diekstraksi dari lapisan sebelumnya. <br> 7. **Output Layer**: Menggunakan lapisan Dense dengan aktivasi sigmoid untuk menghasilkan probabilitas antara 0 (aman) dan 1 (berbahaya). |
-| **Metrik Evaluasi** | Metrik yang digunakan untuk mengevaluasi performa model adalah **binary crossentropy** dan **accuracy**. <br> 1. **Binary Crossentropy**: Mengukur kerugian (loss) antara label sebenarnya dan prediksi model. Rumusnya adalah: <br> $\[ \text{Binary Crossentropy} = -\frac{1}{N} \Sigma_{i=1}^N [y_i \log(p_i) + (1-y_i) \log(1-p_i)] \$] di mana $\( y_i \)$ adalah label sebenarnya, $\( p_i \)$ adalah probabilitas prediksi, dan $\( N \)$ adalah jumlah sampel. <br> 2. **Accuracy**: Mengukur persentase prediksi yang benar dari total prediksi yang dibuat. Rumusnya adalah: <br> $\[ \text{Accuracy} = \frac{\text{Number of Correct Predictions}}{\text{Total Number of Predictions}} \]$ Metrik ini memberikan gambaran umum tentang seberapa baik model dalam mengklasifikasikan input sebagai aman atau berbahaya. |
-| **Performa Model** | Model yang dibuat mencapai performa yang baik pada data uji dengan hasil sebagai berikut: <br> - **Loss**: 0.0027 <br> - **Accuracy**: 0.9988 <br> - **Validation Loss**: 0.0527 <br> - **Validation Accuracy**: 0.9897 <br> Model ini menunjukkan performa yang sangat baik pada data training dengan loss yang sangat rendah dan akurasi yang tinggi. Pada data validasi, model juga menunjukkan hasil yang cukup baik dengan sedikit peningkatan loss, tetapi akurasi tetap sangat tinggi, menunjukkan kemampuan model dalam mendeteksi XSS pada data yang tidak dilihat sebelumnya. |
+| --- | --- |
+| **Dataset** | [Cross site scripting XSS dataset for Deep Learning](https://www.kaggle.com/datasets/syedsaqlainhussain/cross-site-scripting-xss-dataset-for-deep-learning): 13.686 kalimat (`Sentence`), label `1` = XSS (7.373) dan `0` = aman (6.313). |
+| **Masalah** | XSS memungkinkan penyerang menyisipkan skrip berbahaya ke halaman web yang dilihat pengguna lain, menyebabkan pencurian informasi, pengambilalihan akun, dan celah keamanan lain. |
+| **Solusi** | Model deep learning yang mengklasifikasikan input teks sebagai aman atau berbahaya berdasarkan pola yang umum dipakai dalam serangan XSS. |
+| **Pengolahan** | Lowercasing dan penghapusan tanda petik satu dan dua di Transform, lalu tokenisasi dan vektorisasi dengan TextVectorization. |
+| **Arsitektur** | Input string → TextVectorization → Embedding → Conv1D (kernel 3, ReLU) → GlobalMaxPooling1D → Dense (ReLU) → Dense sigmoid (0 = aman, 1 = berbahaya). |
+| **Metrik** | Binary crossentropy dan accuracy untuk pelatihan; Evaluator (TFMA) juga menghitung AUC, true/false positives, true/false negatives, dan example count. Model di-*bless* jika binary accuracy ≥ 0.5 dan tidak lebih buruk dari baseline. |
+
+## Arsitektur Pipeline
+
+```
+data/XSS_dataset.csv
+  → CsvExampleGen (train:eval = 8:2)
+  → StatisticsGen → SchemaGen → ExampleValidator
+  → Transform (lowercase, hapus tanda kutip)
+  → Tuner (30 trial) → Trainer (EarlyStopping, ModelCheckpoint)
+  → Resolver (latest blessed) + Evaluator (TFMA)
+  → Pusher → serving_model_dir/xss-detection-model/1
+  → TensorFlow Serving (Docker)
+```
+
+Pipeline dijalankan langkah demi langkah dengan `InteractiveContext` di `hkacode-training.ipynb`.
+
+## Tech Stack
+
+TFX 1.11.0, TensorFlow Transform, TensorFlow Model Analysis, Keras Tuner, TensorFlow/Keras, TensorFlow Serving, Docker, scikit-learn, Jupyter.
+
+## Struktur Proyek
+
+```
+xss-detection-pipeline/
+├── data/XSS_dataset.csv
+├── xss_transform.py / xss_tuner.py / xss_trainer.py
+├── hkacode-training.ipynb       # Pipeline TFX interaktif
+├── hkacode-testing.ipynb        # Request prediksi ke TF Serving
+├── hkacode-pipeline/            # Artefak komponen TFX dan metadata
+├── serving_model_dir/xss-detection-model/1/
+├── model-metadata.png           # Metadata model di TF Serving
+├── Dockerfile
+└── requirements.txt
+```
+
+## Cara Menjalankan
+
+```bash
+git clone https://github.com/harrymardika/xss-detection-pipeline.git
+cd xss-detection-pipeline
+pip install -r requirements.txt
+jupyter notebook hkacode-training.ipynb      # jalankan pipeline
+```
+
+Serving lokal:
+
+```bash
+docker build -t xss-detection-model . && docker run -p 8080:8501 xss-detection-model
+curl http://localhost:8080/v1/models/xss-detection-model
+```
+
+Model menerima `tf.train.Example` ter-serialisasi dan di-encode base64 (contoh lengkap di `hkacode-testing.ipynb`):
+
+```python
+import base64, requests, tensorflow as tf
+
+def predict(text: bytes):
+    feat = tf.train.Feature(bytes_list=tf.train.BytesList(value=[text]))
+    ex = tf.train.Example(features=tf.train.Features(feature={"Sentence": feat}))
+    payload = {"signature_name": "serving_default",
+               "instances": [{"examples": {"b64": base64.b64encode(ex.SerializeToString()).decode()}}]}
+    return requests.post("http://localhost:8080/v1/models/xss-detection-model:predict", json=payload).json()
+
+print(predict(b'<sup onkeypress="alert(1)" contenteditable>test</sup>'))   # skor > 0.5 berarti XSS
+```
+
+## Author
+
+**Harry Mardika** · [GitHub](https://github.com/harrymardika)
